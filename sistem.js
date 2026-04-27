@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- LOAD RESOURCES ---
     async function loadResources() {
         try {
-            aiModel = await tf.loadLayersModel('../../assets/models/web_model/model.json', {compile: false});
+            aiModel = await tf.loadLayersModel('model.json', {compile: false});
             console.log("✅ TensorFlow: Model Hybrid Loaded.");
             isModelLoaded = true;
             if (elements.imagePreview.complete && elements.imagePreview.naturalWidth > 0) {

@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", function() {
             }
 
             // Pindah ke Landing Page di dalam folder pages/user
-            window.location.href = "pages/user/landing.html";
+            window.location.href = "landing.html";
         });
     }
 

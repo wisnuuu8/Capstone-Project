@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", function() {
     if(btnLogoutAdmin) {
         btnLogoutAdmin.addEventListener('click', function() {
             if(confirm("Yakin ingin keluar dari Dashboard Admin?")) {
-                window.location.replace('../login.html'); 
+                window.location.replace('login.html'); 
             }
         });
     }

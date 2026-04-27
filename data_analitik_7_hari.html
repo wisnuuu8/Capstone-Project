@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analitik 30 Hari - Admin Visage Metrics</title>
+    <title>Analitik 7 Hari - Admin Visage Metrics</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -16,7 +16,6 @@
     <style>
         body { background-color: #f8fafc; color: #1e293b; font-family: 'Poppins', sans-serif; overflow-x: hidden; }
         .bg-cyber { position: fixed; inset: 0; z-index: -2; background: radial-gradient(circle at 15% 50%, #ffffff, transparent 60%), radial-gradient(circle at 85% 30%, #f0f9ff, transparent 60%); }
-        .bg-grid { position: fixed; inset: 0; z-index: -1; background-image: linear-gradient(to right, rgba(14, 165, 233, 0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(14, 165, 233, 0.08) 1px, transparent 1px); background-size: 50px 50px; pointer-events: none; }
         .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border: 1px solid rgba(226, 232, 240, 1); box-shadow: 0 10px 30px rgba(14, 165, 233, 0.05); }
         .sidebar-item { transition: all 0.3s ease; }
         .sidebar-item:hover, .sidebar-item.active { background-color: #f0f9ff; color: #0284c7; border-right: 4px solid #0284c7; }
@@ -75,14 +74,14 @@
     <div class="flex-grow flex flex-col h-full overflow-hidden relative z-10 w-full">
         <header class="h-24 bg-white/60 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-10 shrink-0">
             <div>
-                <h1 class="text-2xl font-black text-slate-800 tracking-tight">Data Analitik 30 Hari</h1>
-                <p class="text-xs text-slate-500 font-medium mt-1">Laporan bulanan akumulasi kesehatan visual</p>
+                <h1 class="text-2xl font-black text-slate-800 tracking-tight">Data Analitik 7 Hari</h1>
+                <p class="text-xs text-slate-500 font-medium mt-1">Rekapitulasi mingguan performa visual mahasiswa</p>
             </div>
             <div class="flex items-center gap-6">
                 <div class="hidden md:flex bg-slate-100 p-1 rounded-xl border border-slate-200">
                     <a href="data_analitik_hari_ini.html" class="px-4 py-1.5 text-xs font-bold rounded-lg text-slate-500 hover:text-slate-800 transition">Hari Ini</a>
-                    <a href="data_analitik_7_hari.html" class="px-4 py-1.5 text-xs font-bold rounded-lg text-slate-500 hover:text-slate-800 transition">7 Hari</a>
-                    <a href="data_analitik_30_hari.html" class="px-4 py-1.5 text-xs font-bold rounded-lg bg-white shadow-sm text-sky-600 border border-slate-200">30 Hari</a>
+                    <a href="data_analitik_7_hari.html" class="px-4 py-1.5 text-xs font-bold rounded-lg bg-white shadow-sm text-sky-600 border border-slate-200">7 Hari</a>
+                    <a href="data_analitik_30_hari.html" class="px-4 py-1.5 text-xs font-bold rounded-lg text-slate-500 hover:text-slate-800 transition">30 Hari</a>
                 </div>
             </div>
         </header>
@@ -90,15 +89,16 @@
         <main class="flex-grow overflow-y-auto p-6 md:p-10 no-scrollbar relative w-full">
             
             <div class="grid lg:grid-cols-2 gap-8 w-full mb-8">
+                
                 <div class="glass-panel p-8 rounded-[2.5rem] w-full">
                     <div class="flex justify-between items-center mb-6">
                         <div>
-                            <h3 class="text-lg font-black text-slate-800">Tren Bulanan (CNN)</h3>
-                            <p class="text-xs text-slate-500 font-medium">Akumulasi deteksi per minggu (30 Hari Terakhir)</p>
+                            <h3 class="text-lg font-black text-slate-800">Tren Mingguan (CNN)</h3>
+                            <p class="text-xs text-slate-500 font-medium">Total deteksi CNN per hari</p>
                         </div>
                     </div>
                     <div class="relative w-full h-[250px]">
-                        <canvas id="monthlyTrendChart"></canvas>
+                        <canvas id="weeklyTrendChart"></canvas>
                     </div>
                 </div>
 
@@ -106,20 +106,19 @@
                     <div class="flex justify-between items-center mb-6">
                         <div>
                             <h3 class="text-lg font-black text-slate-800">Status Visual per Prodi</h3>
-                            <p class="text-xs text-slate-500 font-medium">Perbandingan kondisi mahasiswa (30 Hari Terakhir)</p>
+                            <p class="text-xs text-slate-500 font-medium">Perbandingan kondisi mahasiswa (7 Hari Terakhir)</p>
                         </div>
                     </div>
                     <div class="relative w-full h-[250px]">
-                        <canvas id="monthlyProdiChart"></canvas>
+                        <canvas id="weeklyProdiChart"></canvas>
                     </div>
                 </div>
-            </div>
 
-            <div class="glass-panel p-8 rounded-[2.5rem] w-full flex flex-col">
+            </div> <div class="glass-panel p-8 rounded-[2.5rem] w-full flex flex-col">
                 <div class="flex justify-between items-center mb-6">
                     <div>
                         <h3 class="text-xl font-black text-slate-800">Riwayat Klasifikasi</h3>
-                        <p class="text-xs text-slate-500 font-medium mt-1">Daftar riwayat pemrosesan gambar dan hasil deteksi (30 Hari Terakhir)</p>
+                        <p class="text-xs text-slate-500 font-medium mt-1">Daftar riwayat pemrosesan gambar dan hasil deteksi (7 Hari Terakhir)</p>
                     </div>
                 </div>
                 
@@ -136,19 +135,27 @@
                         </thead>
                         <tbody class="text-sm">
                             <tr class="hover:bg-slate-50 transition cursor-pointer group">
-                                <td class="py-4 px-4 text-slate-500 font-medium">20 April 2026<br><span class="text-[10px] font-bold text-slate-400">09:12:00 WIB</span></td>
-                                <td class="py-4 px-4"><p class="font-bold text-slate-800">Wisnu Aji Sanjaya</p><p class="text-[10px] text-slate-500 font-mono">1201230001</p></td>
+                                <td class="py-4 px-4 text-slate-500 font-medium">18 April 2026<br><span class="text-[10px] font-bold text-slate-400">14:23:05 WIB</span></td>
+                                <td class="py-4 px-4"><p class="font-bold text-slate-800">Yoka Romadani</p><p class="text-[10px] text-slate-500 font-mono">1201230045</p></td>
                                 <td class="py-4 px-4 text-slate-600 font-medium">S1 Sains Data</td>
-                                <td class="py-4 px-4 text-slate-600 font-medium font-mono text-xs">0.35 <span class="text-[10px] text-emerald-400">(Normal)</span></td>
+                                <td class="py-4 px-4 text-slate-600 font-medium font-mono text-xs">0.18 <span class="text-[10px] text-red-400">(Low)</span></td>
+                                <td class="py-4 px-4"><span class="px-3 py-1 bg-red-50 text-red-600 border border-red-200 text-[10px] font-bold rounded-md tracking-widest uppercase">Mata Sayu</span></td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 transition cursor-pointer group">
+                                <td class="py-4 px-4 text-slate-500 font-medium">16 April 2026<br><span class="text-[10px] font-bold text-slate-400">10:15:30 WIB</span></td>
+                                <td class="py-4 px-4"><p class="font-bold text-slate-800">Mikhael Setia Budi</p><p class="text-[10px] text-slate-500 font-mono">1201230088</p></td>
+                                <td class="py-4 px-4 text-slate-600 font-medium">S1 Sains Data</td>
+                                <td class="py-4 px-4 text-slate-600 font-medium font-mono text-xs">0.32 <span class="text-[10px] text-emerald-400">(Normal)</span></td>
                                 <td class="py-4 px-4"><span class="px-3 py-1 bg-emerald-50 text-emerald-600 border border-emerald-200 text-[10px] font-bold rounded-md tracking-widest uppercase">Mata Segar</span></td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
+
         </main>
     </div>
 
-    <script src="../../assets/js/analitik_30_hari.js"></script>
+    <script src="analitik_7_hari.js"></script>
 </body>
 </html>
