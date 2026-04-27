@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // --- 2. LOGIKA TOMBOL KEMBALI ---
     // Memberikan efek feedback saat tombol kembali diklik
-    const backBtn = document.querySelector('a[href="landing.html"]');
+    const backBtn = document.querySelector('a[href="index.html"]');
     if (backBtn) {
         backBtn.addEventListener('click', function() {
             console.log("Navigasi kembali ke Beranda...");
