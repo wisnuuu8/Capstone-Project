@@ -5,6 +5,7 @@
 # 1. BLOKIR SEMUA GAMBAR (Sesuai request lu mutlak)
 *.jpg
 *.jpeg
+*.png
 *.gif
 *.svg
 *.webp
