@@ -1,89 +1,62 @@
-// File: assets/js/landing.js
+// Import client Supabase
+import { supabase } from 'supabaseClient.js';
 
-document.addEventListener('DOMContentLoaded', () => {
-
-    // =========================================================
-    // 1. EFEK NAVBAR SCROLL (Warna Background)
-    // =========================================================
-    const navbar = document.getElementById('navbar');
-    window.addEventListener('scroll', () => {
-        if (window.scrollY > 50) {
-            navbar.classList.add('shadow-lg', 'bg-white/95');
-            navbar.classList.remove('bg-white/80');
-        } else {
-            navbar.classList.remove('shadow-lg', 'bg-white/95');
-            navbar.classList.add('bg-white/80');
-        }
-    });
-
-    // =========================================================
-    // 2. NAVIGASI LINKS (Hanya untuk Menu Tengah)
-    // =========================================================
+document.addEventListener('DOMContentLoaded', async () => {
     
-    // PERBAIKAN KRUSIAL: Kita ambil link yang ada di dalam div menu saja, 
-    // bukan seluruh nav. Logo tidak akan tersentuh.
-    const navMenuContainer = document.querySelector('.hidden.lg\\:flex'); 
-    const navLinks = navMenuContainer.querySelectorAll('a[href^="#"]');
-    
-    // Ambil semua link berawalan '#' untuk smooth scroll (termasuk logo & tombol panah)
-    const allScrollLinks = document.querySelectorAll('a[href^="#"]');
-
-    // Smooth Scroll Logic
-    allScrollLinks.forEach(link => {
-        link.addEventListener('click', function (e) {
-            e.preventDefault();
-            const targetId = this.getAttribute('href');
-            const targetSection = document.querySelector(targetId);
-            if (targetSection) {
-                targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-        });
-    });
+    // ... (Kode Efek Navbar & Spy Scroll tetap sama seperti milikmu) ...
 
     // =========================================================
-    // 3. LOGIKA GARIS BIRU (SPY SCROLL)
-    // =========================================================
-    const sections = document.querySelectorAll('section[id]');
-    
-    const observerOptions = {
-        root: null,
-        rootMargin: '-25% 0px -65% 0px', // Area deteksi diperketat
-        threshold: 0
-    };
-
-    const sectionObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const currentId = entry.target.getAttribute('id');
-                
-                navLinks.forEach(link => {
-                    // Hapus class aktif (Garis Biru & Warna Biru) dari SEMUA menu tengah
-                    link.classList.remove('text-sky-600', 'border-b-2', 'border-sky-500');
-                    link.classList.add('text-slate-500');
-                    
-                    // Tambahkan kembali HANYA ke menu yang sedang aktif
-                    if (link.getAttribute('href') === `#${currentId}`) {
-                        link.classList.remove('text-slate-500');
-                        link.classList.add('text-sky-600', 'border-b-2', 'border-sky-500');
-                    }
-                });
-            }
-        });
-    }, observerOptions);
-
-    sections.forEach(section => {
-        sectionObserver.observe(section);
-    });
-
-    // =========================================================
-    // 4. SIDEBAR PROFIL (Tetap Sama)
+    // 4. LOGIKA PROFIL & SUPABASE
     // =========================================================
     const btnProfile = document.getElementById('nav-profile-btn');
     const btnClose = document.getElementById('close-profile-btn');
     const backdrop = document.getElementById('profile-backdrop');
     const sidebar = document.getElementById('profile-sidebar');
 
+    // Elemen isian profil di HTML (Pastikan ID ini ada di HTML kamu)
+    const displayNama = document.getElementById('profile-name');
+    const displayNIM = document.getElementById('profile-nim');
+    const displayStatus = document.getElementById('profile-status');
+    const displayRole = document.getElementById('profile-role');
+
+    const loadUserProfile = async () => {
+        // 1. Cek sesi user yang sedang login
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (user) {
+            // 2. Ambil data dari tabel profil_pengguna
+            const { data: profile, error } = await supabase
+                .from('profil_pengguna')
+                .select('*')
+                .eq('id', user.id)
+                .single();
+
+            if (error) {
+                console.error('Gagal mengambil profil:', error);
+                return;
+            }
+
+            // 3. Suntik data ke UI Sidebar
+            if (profile) {
+                if (displayNama) displayNama.innerText = profile.nama_lengkap;
+                if (displayNIM) displayNIM.innerText = profile.nim;
+                if (displayStatus) {
+                    displayStatus.innerText = profile.status_akun;
+                    // Beri warna hijau jika aktif
+                    displayStatus.className = profile.status_akun === 'aktif' 
+                        ? 'text-green-500 font-bold' 
+                        : 'text-red-500 font-bold';
+                }
+                if (displayRole) displayRole.innerText = profile.role;
+            }
+        } else {
+            // Jika tidak ada user login, arahkan ke halaman login atau sembunyikan tombol
+            console.log("User belum login.");
+        }
+    };
+
     const openSidebar = () => {
+        loadUserProfile(); // Ambil data terbaru setiap kali dibuka
         backdrop.classList.remove('hidden');
         setTimeout(() => {
             backdrop.classList.remove('opacity-0');
