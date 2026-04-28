@@ -1,17 +1,27 @@
+// Pastikan path import sesuai dengan struktur folder lu
 import { supabase } from 'supabaseClient.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     
     const loginForm = document.getElementById('login-form');
-    const usernameInput = document.getElementById('username'); // Pake Username Njir
+    const usernameInput = document.getElementById('username'); 
     const passwordInput = document.getElementById('password');
     const btnLogin = document.getElementById('btn-login');
 
-    // 1. Cek Sesi Aktif
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session) window.location.href = "index.html";
+    // =========================================================
+    // 1. GATEKEEPER: Cek Sesi Aktif
+    // =========================================================
+    const checkSession = async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+            window.location.href = "index.html";
+        }
+    };
+    await checkSession();
 
-    // 2. Logika Login via Username
+    // =========================================================
+    // 2. LOGIKA LOGIN (Sesuai Dokumentasi .local)
+    // =========================================================
     loginForm?.addEventListener('submit', async (e) => {
         e.preventDefault();
 
@@ -23,53 +33,44 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
+        // Efek Loading
         btnLogin.disabled = true;
-        btnLogin.textContent = "MENCARI USER...";
+        btnLogin.textContent = "VERIFIKASI SISTEM...";
 
         try {
-            // STEP A: Cari Email berdasarkan Username di tabel profil_pengguna
-            const { data: profile, error: profileError } = await supabase
-                .from('profil_pengguna')
-                .select('id, username') 
-                .eq('username', username)
-                .single();
+            // KONVERSI USERNAME KE EMAIL (Sesuai SETUP_GUIDE.md)
+            const email = `${username}@visagemetrics.local`;
 
-            if (profileError || !profile) {
-                alert("Username kagak terdaftar, Wir. Cek lagi!");
-                resetButton();
-                return;
-            }
-
-            // NOTE: Karena Supabase Auth butuh email, 
-            // kita asumsikan format email lu adalah username@student.tup.ac.id 
-            // atau lu simpan kolom email di profil_pengguna.
-            // Di sini gue pake trik: cari email asli dari user_id yang ketemu.
-            
-            btnLogin.textContent = "VERIFIKASI SANDI...";
-
-            // STEP B: Karena kita nggak punya email-nya langsung (kecuali lu simpan di profil_pengguna), 
-            // Kita coba login pake email yang "tersembunyi". 
-            // Tips: Saat Register, pastikan lu simpan email & username dengan benar.
-            
-            // Jika lu nggak simpan email di tabel profil_pengguna, lu bisa pake format dummy 
-            // (Hanya jika saat register lu pake format yang sama):
-            const hiddenEmail = `${username}@visagemetrics.com`; 
-
+            // Tembak langsung ke Supabase Auth
             const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-                email: hiddenEmail, 
+                email: email, 
                 password: password,
             });
 
             if (authError) {
-                alert("Password salah, njir! Coba inget-inget lagi.");
+                // Jika gagal, cek pesan errornya
+                console.error("Login Error:", authError.message);
+                alert("Akses Ditolak: Username atau password salah!");
                 resetButton();
             } else {
+                // JIKA BERHASIL: Catat Log Aktivitas (Sesuai Dokumen Integrasi)
+                const user = authData.user;
+                
+                await supabase.from('log_aktivitas').insert([
+                    { 
+                        tipe_log: 'LOGIN', 
+                        deskripsi: `User ${username} berhasil masuk ke sistem`, 
+                        user_id: user.id 
+                    }
+                ]);
+
+                // Redirect ke Landing Page
                 window.location.href = "index.html";
             }
 
         } catch (err) {
-            console.error(err);
-            alert("Sistem error, hubungi admin!");
+            console.error("System Error:", err);
+            alert("Terjadi gangguan pada server Visage Metrics.");
             resetButton();
         }
     });

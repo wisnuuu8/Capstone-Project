@@ -1,13 +1,15 @@
-import { supabase } from 'supabaseClient.js';
+// Pastikan path import benar
+import { supabase } from './supabaseClient.js';
 
 document.addEventListener("DOMContentLoaded", function() {
     
     const formRegister = document.getElementById('registerForm');
-    const inputUsername = document.getElementById('inputUsername'); // Username Njir
+    const inputUsername = document.getElementById('inputUsername'); 
     const inputNim = document.getElementById('inputNim');
     const inputNama = document.getElementById('inputNama');
     const inputProdi = document.getElementById('inputProdi');
     const inputUsia = document.getElementById('inputUsia');
+    const inputAngkatan = document.getElementById('inputAngkatan'); // Tambahan sesuai doc lu
     const inputPassword = document.getElementById('inputPasswordReg');
     const inputRepassword = document.getElementById('inputRepassword');
     const errorMsg = document.getElementById('errorMsg');
@@ -26,8 +28,9 @@ document.addEventListener("DOMContentLoaded", function() {
             // 2. Persiapan Data
             const username = inputUsername.value.trim();
             const password = inputPassword.value;
-            // Buat email gaib untuk Supabase Auth
-            const hiddenEmail = `${username}@visagemetrics.com`;
+            
+            // SESUAI DOKUMEN: Pake suffix .local
+            const hiddenEmail = `${username}@visagemetrics.local`;
 
             // Loading State
             btnRegister.disabled = true;
@@ -50,17 +53,17 @@ document.addEventListener("DOMContentLoaded", function() {
 
                 if (user) {
                     // STEP B: Masukkan Data ke Tabel profil_pengguna
-                    // Sesuai dengan isian yang lu minta tadi
                     const { error: profileError } = await supabase
                         .from('profil_pengguna')
                         .insert([
                             {
-                                id: user.id, // FK ke auth.users
+                                id: user.id, 
                                 username: username,
                                 nim: inputNim.value,
                                 nama_lengkap: inputNama.value,
                                 prodi: inputProdi.value,
                                 usia: parseInt(inputUsia.value) || 0,
+                                angkatan: parseInt(inputAngkatan.value) || 2026, // Default tahun ini
                                 status_akun: 'aktif',
                                 role: 'mahasiswa'
                             }
@@ -69,16 +72,26 @@ document.addEventListener("DOMContentLoaded", function() {
                     if (profileError) {
                         showError("Gagal Simpan Profil: " + profileError.message);
                         resetBtn();
-                    } else {
-                        // BERHASIL!
-                        alert("Registrasi Berhasil! Silakan masuk menggunakan username Anda.");
-                        window.location.href = "login.html";
+                        return;
                     }
+
+                    // STEP C: Catat Log Aktivitas (Sesuai dokumentasi lu)
+                    await supabase.from('log_aktivitas').insert([
+                        { 
+                            tipe_log: 'REGISTER', 
+                            deskripsi: `User baru terdaftar: ${username}`, 
+                            user_id: user.id 
+                        }
+                    ]);
+
+                    // BERHASIL!
+                    alert("Registrasi Berhasil! Silakan masuk menggunakan username Anda.");
+                    window.location.href = "login.html";
                 }
 
             } catch (err) {
-                console.error(err);
-                showError("Terjadi kesalahan sistem.");
+                console.error("Critical Error:", err);
+                showError("Terjadi kesalahan sistem fatal.");
                 resetBtn();
             }
         });
@@ -96,7 +109,6 @@ document.addEventListener("DOMContentLoaded", function() {
         btnRegister.textContent = "DAFTAR SEKARANG";
     }
 
-    // Sembunyikan error saat user mulai mengetik ulang
     inputRepassword.addEventListener('input', () => {
         errorMsg.classList.add('hidden');
     });
