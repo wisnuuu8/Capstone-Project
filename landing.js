@@ -1,6 +1,28 @@
-// File: assets/js/landing.js
+import { supabase } from 'supabaseClient.js';
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+
+    // =========================================================
+    // 0. PROTEKSI HALAMAN (GATEKEEPER)
+    // =========================================================
+    // Sembunyikan body sementara agar tidak terjadi "flicker" konten
+    document.body.style.opacity = '0';
+
+    const checkAccess = async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        // Jika TIDAK ADA sesi aktif, langsung lempar ke login.html
+        if (!session) {
+            window.location.href = "login.html";
+            return;
+        }
+
+        // Jika ADA sesi, tampilkan kembali body-nya
+        document.body.style.opacity = '1';
+        document.body.style.transition = 'opacity 0.5s ease-in-out';
+    };
+
+    await checkAccess();
 
     // =========================================================
     // 1. EFEK NAVBAR SCROLL (Warna Background)
@@ -17,18 +39,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // =========================================================
-    // 2. NAVIGASI LINKS (Hanya untuk Menu Tengah)
+    // 2. NAVIGASI LINKS & SMOOTH SCROLL
     // =========================================================
-    
-    // PERBAIKAN KRUSIAL: Kita ambil link yang ada di dalam div menu saja, 
-    // bukan seluruh nav. Logo tidak akan tersentuh.
     const navMenuContainer = document.querySelector('.hidden.lg\\:flex'); 
-    const navLinks = navMenuContainer.querySelectorAll('a[href^="#"]');
-    
-    // Ambil semua link berawalan '#' untuk smooth scroll (termasuk logo & tombol panah)
+    const navLinks = navMenuContainer ? navMenuContainer.querySelectorAll('a[href^="#"]') : [];
     const allScrollLinks = document.querySelectorAll('a[href^="#"]');
 
-    // Smooth Scroll Logic
     allScrollLinks.forEach(link => {
         link.addEventListener('click', function (e) {
             e.preventDefault();
@@ -44,10 +60,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // 3. LOGIKA GARIS BIRU (SPY SCROLL)
     // =========================================================
     const sections = document.querySelectorAll('section[id]');
-    
     const observerOptions = {
         root: null,
-        rootMargin: '-25% 0px -65% 0px', // Area deteksi diperketat
+        rootMargin: '-25% 0px -65% 0px',
         threshold: 0
     };
 
@@ -55,13 +70,9 @@ document.addEventListener('DOMContentLoaded', () => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 const currentId = entry.target.getAttribute('id');
-                
                 navLinks.forEach(link => {
-                    // Hapus class aktif (Garis Biru & Warna Biru) dari SEMUA menu tengah
                     link.classList.remove('text-sky-600', 'border-b-2', 'border-sky-500');
                     link.classList.add('text-slate-500');
-                    
-                    // Tambahkan kembali HANYA ke menu yang sedang aktif
                     if (link.getAttribute('href') === `#${currentId}`) {
                         link.classList.remove('text-slate-500');
                         link.classList.add('text-sky-600', 'border-b-2', 'border-sky-500');
@@ -71,33 +82,123 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }, observerOptions);
 
-    sections.forEach(section => {
-        sectionObserver.observe(section);
-    });
+    sections.forEach(section => sectionObserver.observe(section));
 
     // =========================================================
-    // 4. SIDEBAR PROFIL (Tetap Sama)
+    // 4. CEK STATUS LOGIN (Session-Based)
+    // =========================================================
+    const authBtn = document.getElementById("nav-auth-btn");
+    
+    const updateNavUI = async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+            authBtn.textContent = "SISTEM";
+            authBtn.href = "form_pengguna.html"; 
+        } else {
+            authBtn.textContent = "LOGIN";
+            authBtn.href = "login.html";
+        }
+    };
+    
+    await updateNavUI();
+
+    // =========================================================
+    // 5. LOGIKA SIDEBAR PROFIL & CRUD SUPABASE
     // =========================================================
     const btnProfile = document.getElementById('nav-profile-btn');
     const btnClose = document.getElementById('close-profile-btn');
+    const btnLogout = document.getElementById('logout-btn');
     const backdrop = document.getElementById('profile-backdrop');
     const sidebar = document.getElementById('profile-sidebar');
+    const profileForm = document.getElementById('form-update-profil');
 
-    const openSidebar = () => {
+    // Ambil data asli dari tabel profil_pengguna
+    const loadProfileData = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { data: profile, error } = await supabase
+            .from('profil_pengguna')
+            .select('*')
+            .eq('id', user.id)
+            .single();
+
+        if (profile) {
+            // Update UI Sidebar
+            document.getElementById('display-nama-header').innerText = profile.nama_lengkap || 'User';
+            document.getElementById('display-nim-header').innerText = `ID: ${profile.nim || '-'}`;
+            document.getElementById('display-status-badge').innerText = `Status: ${profile.status_akun || 'Aktif'}`;
+            document.getElementById('display-prodi-badge').innerText = profile.prodi || '-';
+
+            // Update Form Input
+            document.getElementById('input-email').value = user.email;
+            document.getElementById('input-nama').value = profile.nama_lengkap || '';
+            document.getElementById('input-usia').value = profile.usia || '';
+            document.getElementById('input-prodi').value = profile.prodi || '';
+        }
+    };
+
+    const openProfileSidebar = async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+            window.location.href = "login.html"; 
+            return;
+        }
+
+        await loadProfileData();
         backdrop.classList.remove('hidden');
         setTimeout(() => {
             backdrop.classList.remove('opacity-0');
             sidebar.classList.remove('translate-x-full');
         }, 10);
+        document.body.style.overflow = 'hidden';
     };
 
-    const closeSidebar = () => {
+    const closeProfileSidebar = () => {
         backdrop.classList.add('opacity-0');
         sidebar.classList.add('translate-x-full');
-        setTimeout(() => backdrop.classList.add('hidden'), 500);
+        setTimeout(() => {
+            backdrop.classList.add('hidden');
+            document.body.style.overflow = '';
+        }, 500);
     };
 
-    if (btnProfile) btnProfile.addEventListener('click', openSidebar);
-    if (btnClose) btnClose.addEventListener('click', closeSidebar);
-    if (backdrop) backdrop.addEventListener('click', closeSidebar);
+    // Handler Update Profil
+    profileForm?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        const updatedData = {
+            nama_lengkap: document.getElementById('input-nama').value,
+            usia: parseInt(document.getElementById('input-usia').value) || 0,
+            prodi: document.getElementById('input-prodi').value
+        };
+
+        const { error } = await supabase
+            .from('profil_pengguna')
+            .update(updatedData)
+            .eq('id', user.id);
+
+        if (error) {
+            alert("Gagal update sistem: " + error.message);
+        } else {
+            alert("Profil berhasil diperbarui secara sistem!");
+            await loadProfileData();
+        }
+    });
+
+    // Handler Logout Sistem
+    btnLogout?.addEventListener('click', async () => {
+        if (confirm("Apakah Anda yakin ingin keluar dari sistem?")) {
+            const { error } = await supabase.auth.signOut();
+            if (!error) {
+                window.location.href = "login.html"; 
+            }
+        }
+    });
+
+    // Listeners UI
+    if (btnProfile) btnProfile.addEventListener('click', openProfileSidebar);
+    if (btnClose) btnClose.addEventListener('click', closeProfileSidebar);
+    if (backdrop) backdrop.addEventListener('click', closeProfileSidebar);
 });
