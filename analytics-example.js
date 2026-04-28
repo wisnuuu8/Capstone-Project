@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const user = await getCurrentUser();
     if (!user) {
         console.error('❌ User tidak ditemukan. Silakan login terlebih dahulu.');
-        window.location.href = '../../login.html';
+        window.location.href = 'login.html';
         return;
     }
 
