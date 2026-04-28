@@ -22,7 +22,11 @@
 .env.local
 config.js
 api_key.js
-*.env
+.env.*
+config.js
+
+# Abaikan folder dependency (jika ada)
+node_modules/
 
 # 3. FILE SAMPAH SISTEM OS
 # File bawaan Windows/Mac yang nggak guna di GitHub
@@ -46,6 +50,7 @@ desktop.ini
 node_modules/
 npm-debug.log
 yarn-error.log
+api-config.js
 
 # ===================================================
 # PENGECUALIAN (FILE YANG TETAP BOLEH KE-PUSH)
