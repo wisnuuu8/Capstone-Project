@@ -65,14 +65,11 @@
                     <a href="about.html" id="nav-team-link" class="text-slate-500 hover:text-sky-600 transition pb-1">TEAM</a>                
                 </div>
                 
-                <div class="space-y-4">
-                        <h2 class="text-xl font-bold border-b pb-2">Profil Pengguna</h2>
-                        <p><strong>Nama:</strong> <span id="profile-name">Memuat...</span></p>
-                        <p><strong>NIM:</strong> <span id="profile-nim">-</span></p>
-                        <p><strong>Role:</strong> <span id="profile-role">-</span></p>
-                        <p><strong>Status:</strong> <span id="profile-status">-</span></p>
-                        
-                        <button id="logout-btn" class="w-full bg-red-500 text-white py-2 rounded mt-10">Keluar</button>
+                <div class="flex items-center gap-4">
+                    <button id="nav-profile-btn" class="flex items-center justify-center w-11 h-11 bg-sky-50 border border-sky-100 text-sky-600 hover:bg-sky-100 hover:text-sky-700 rounded-xl transition-all shadow-sm hover:scale-105 group relative cursor-pointer z-50">
+                        <span class="text-xl pointer-events-none">👨‍🎓</span>
+                        <span class="absolute -bottom-8 bg-white text-slate-600 text-[10px] tracking-widest px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-slate-200 shadow-md">PROFIL</span>
+                    </button>
                 </div>
             </div>
         </div>
